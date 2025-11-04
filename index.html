@@ -1,0 +1,428 @@
+!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="calculo de consumo electrico" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Consumo Eléctrico - CEC</title>
+    <!-- Incluyendo Tailwind CSS para un diseño moderno y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Usando la fuente Inter para una apariencia limpia */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Fondo muy oscuro (Slate 900) */
+            color: #f3f4f6; /* Texto claro por defecto */
+        }
+        /* Estilos generales de tarjeta y input */
+        .card {
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.5); /* Sombra para resaltar */
+        }
+        .input-field, .select-field {
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.6rem 0.75rem;
+            border: 1px solid #475569; /* Borde gris oscuro (Slate 600) */
+            transition: all 0.2s;
+            width: 100%;
+            color: #f3f4f6; /* Texto claro en inputs */
+            background-color: #1f2937; /* Gris oscuro para el fondo de inputs (Gray 800) */
+        }
+        .input-field:focus, .select-field:focus {
+            outline: none;
+            border-color: #f59e0b; /* Amarillo vibrante al enfocar */
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.4);
+            background-color: #111827; /* Fondo más oscuro al enfocar */
+        }
+        /* Estilos específicos para la fila de agregar dispositivo (desktop) */
+        @media (min-width: 1024px) {
+            .input-row {
+                grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr 1fr;
+            }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cec-green': '#10b981',      /* Verde (Accent 1) */
+                        'accent-yellow': '#f59e0b',  /* Amarillo vibrante (Accent 2) */
+                        'primary-dark': '#1e293b',   /* Slate-800 para tarjeta principal */
+                        'secondary-dark': '#334155', /* Slate-700 para área de configuración */
+                        'text-light': '#f3f4f6',     /* Texto claro */
+                        'header-bg-deep': '#0f172a', /* Slate-900/Navy profundo */
+                        'highlight-blue': '#3b82f6', /* Azul vibrante para kWh */
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex flex-col items-center bg-header-bg-deep">
+
+    <!-- Header/Logo con fondo de color -->
+    <header class="w-full max-w-5xl mb-6 bg-primary-dark py-4 px-6 rounded-b-xl shadow-2xl hidden lg:block">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <!-- CEC Logo Placeholder -->
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-cec-green">
+                    <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" fill="currentColor" fill-opacity="0.5"/>
+                    <path d="M12 11L17 8.5L12 6L7 8.5L12 11ZM12 13.5V18.5L17 16L12 13.5ZM12 13.5L7 16L12 18.5V13.5Z" fill="currentColor"/>
+                </svg>
+                <span class="text-lg font-extrabold text-text-light">NUESTRA ENERGÍA CONECTA</span>
+            </div>
+            <nav class="hidden md:flex space-x-6 text-sm text-text-light/80">
+                <a href="#" class="hover:text-accent-yellow">Nosotros</a>
+                <a href="#" class="hover:text-accent-yellow">Clientes</a>
+                <a href="#" class="hover:text-accent-yellow">Contacto</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="w-full max-w-5xl bg-primary-dark card rounded-xl p-6 md:p-10 text-text-light">
+
+        <!-- Contenedor del Título Principal y Subtítulo -->
+        <div class="bg-secondary-dark p-4 md:p-6 rounded-lg mb-8 shadow-xl">
+            <h1 class="text-2xl md:text-4xl lg:text-5xl font-extrabold text-white mb-1 text-center lg:text-left">
+                Calculadora de Consumo Eléctrico Residencial
+            </h1>
+            <!-- Subtítulo Proyecto -->
+            <p class="text-base lg:text-xl font-medium text-gray-300 text-center lg:text-left">
+                Proyecto de 2º Medio E
+            </p>
+        </div>
+        
+        <!-- Configuración Global (CLP/kWh y Cargo Fijo) - Fondo oscuro -->
+        <div class="mb-8 p-4 bg-secondary-dark rounded-lg border border-gray-600 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="costoKWh" class="block text-sm font-bold text-text-light mb-1">
+                    Costo de 1 kWh (CLP/kWh)
+                </label>
+                <!-- Usando la clase input-field con fondo oscuro de la sección style -->
+                <input type="number" id="costoKWh" class="input-field w-full" value="150" placeholder="Ej: 150">
+                <p class="text-xs text-gray-400 mt-1">Valor promedio en tu boleta.</p>
+            </div>
+            <div>
+                <label for="cargoFijo" class="block text-sm font-bold text-text-light mb-1">
+                    Cargo Fijo Mensual (CLP)
+                </label>
+                <!-- Usando la clase input-field con fondo oscuro de la sección style -->
+                <input type="number" id="cargoFijo" class="input-field w-full" value="2000" placeholder="Ej: 2000">
+                <p class="text-xs text-gray-400 mt-1">Monto fijo que siempre se cobra.</p>
+            </div>
+            
+        </div>
+
+        <!-- Fila de Ingreso de Nuevo Dispositivo -->
+        <div class="mb-6">
+            <h2 class="text-xl font-bold text-text-light mb-3">Agregar Dispositivo</h2>
+            
+            <!-- Encabezados de Columna (Solo visible en Desktop) -->
+            <div class="hidden lg:grid input-row text-xs font-semibold text-gray-400 mb-2 gap-4">
+                <span class="col-span-2">Artefacto</span>
+                <span>Potencia (W)</span>
+                <span>Cant.</span>
+                <span>Horas/Día</span>
+                <span>Días/Mes</span>
+                <span class="text-right">KWh Mensual</span>
+                <span class="text-right">Costo Mensual</span>
+                <span></span>
+            </div>
+
+            <!-- Fila de Inputs del Artefacto (Grid para Desktop, Flex para Mobile) -->
+            <div class="grid grid-cols-2 lg:grid-cols-8 gap-4 input-row items-end">
+                
+                <!-- Artefacto (Input de texto simple en lugar de dropdown) -->
+                <div class="col-span-2">
+                    <label for="inputNombre" class="lg:hidden text-xs font-semibold text-gray-400 mb-1 block">Artefacto</label>
+                    <input type="text" id="inputNombre" class="input-field" placeholder="Nombre del equipo" value="TV Dormitorio">
+                </div>
+                
+                <!-- Potencia (W) -->
+                <div>
+                    <label for="inputPotencia" class="lg:hidden text-xs font-semibold text-gray-400 mb-1 block">Potencia (W)</label>
+                    <input type="number" id="inputPotencia" class="input-field" placeholder="W" value="100">
+                </div>
+                
+                <!-- Cantidad -->
+                <div>
+                    <label for="inputCantidad" class="lg:hidden text-xs font-semibold text-gray-400 mb-1 block">Cant.</label>
+                    <input type="number" id="inputCantidad" class="input-field" placeholder="Cant." value="1">
+                </div>
+                
+                <!-- Horas/Día -->
+                <div>
+                    <label for="inputHoras" class="lg:hidden text-xs font-semibold text-gray-400 mb-1 block">Horas/Día</label>
+                    <input type="number" id="inputHoras" class="input-field" placeholder="h/día" value="4">
+                </div>
+                
+                <!-- Días/Mes -->
+                <div>
+                    <label for="inputDias" class="lg:hidden text-xs font-semibold text-gray-400 mb-1 block">Días/Mes</label>
+                    <input type="number" id="inputDias" class="input-field" placeholder="d/mes" value="30">
+                </div>
+                
+                <!-- KWh Mensual (Output Temporal) -->
+                <div class="hidden lg:block">
+                    <!-- Fondo diferente para readonly -->
+                    <input type="text" id="tempKwh" class="input-field bg-gray-700 text-right font-bold text-highlight-blue" readonly value="0.00 kWh">
+                </div>
+                
+                <!-- Costo Mensual (Output Temporal) -->
+                <div class="hidden lg:block">
+                    <!-- Fondo diferente para readonly -->
+                    <input type="text" id="tempCosto" class="input-field bg-gray-700 text-right font-bold text-cec-green" readonly value="$ 0">
+                </div>
+
+                <!-- Botón Agregar - Con gradiente y más sombra -->
+                <button onclick="agregarDispositivo()" id="btnAgregar" class="col-span-2 lg:col-span-1 bg-gradient-to-r from-cec-green to-teal-500 hover:from-teal-500 hover:to-cec-green text-white font-bold py-2 rounded-md transition duration-300 shadow-lg hover:shadow-xl h-full min-h-[44px]">
+                    Agregar
+                </button>
+            </div>
+            <!-- Mensaje de error (oculto por defecto) -->
+            <p id="errorMensaje" class="text-sm text-red-400 font-semibold mt-2 hidden">
+                ¡Error! Por favor, ingresa todos los valores numéricos válidos y positivos (horas puede ser 0).
+            </p>
+        </div>
+
+        <!-- Tabla de Dispositivos Agregados -->
+        <div class="mt-8">
+            <h2 class="text-xl font-bold text-text-light mb-3">Consumo de Artefactos</h2>
+            
+            <div class="overflow-x-auto bg-secondary-dark rounded-lg shadow-inner">
+                <table class="min-w-full divide-y divide-gray-600">
+                    <thead class="bg-secondary-dark/50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-300 uppercase tracking-wider">Artefacto</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-300 uppercase tracking-wider">Potencia (W)</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-300 uppercase tracking-wider">Consumo Total (kWh)</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-300 uppercase tracking-wider">Costo Mensual</th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-bold text-gray-300 uppercase tracking-wider">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaDispositivos" class="bg-secondary-dark divide-y divide-gray-700">
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-400">
+                                Aún no ha agregado ningún dato a la tabla.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Total Consumo y Costo Final -->
+        <div class="flex flex-col md:flex-row justify-end mt-8 space-y-4 md:space-y-0 md:space-x-8">
+            
+            <!-- Total Consumo KWh -->
+            <div class="text-right p-3 bg-gray-700 rounded-lg shadow-md">
+                <span class="text-sm font-semibold text-gray-300 block">Total Consumo (kWh)</span>
+                <span id="totalKwh" class="text-2xl font-extrabold text-highlight-blue">0.00 kWh</span>
+            </div>
+
+            <!-- Costo Final - Gradiente y texto blanco -->
+            <div class="text-right p-4 bg-gradient-to-r from-cec-green to-teal-500 text-white rounded-lg shadow-xl">
+                <span class="text-sm font-bold block">Total a Pagar (CLP)</span>
+                <span id="totalCosto" class="text-3xl font-extrabold">$ 0</span>
+                <p class="text-xs text-white/80 italic mt-1" id="cargoFijoNota">
+                    * Incluye cargo fijo mensual de $ 2.000
+                </p>
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        // Array global para almacenar los dispositivos agregados
+        let devices = [];
+        
+        // Objeto para formatear la moneda a CLP
+        const formatterCLP = new Intl.NumberFormat('es-CL', {
+            style: 'currency',
+            currency: 'CLP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        });
+
+        // Función para mostrar números con 2 decimales
+        const formatNumber = (num) => num.toFixed(2);
+
+        // Actualiza las salidas temporales de KWh y Costo Mensual mientras el usuario escribe
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = ['inputPotencia', 'inputCantidad', 'inputHoras', 'inputDias'];
+            inputs.forEach(id => {
+                const inputElement = document.getElementById(id);
+                if (inputElement) {
+                    inputElement.addEventListener('input', previsualizarCosto);
+                }
+            });
+            document.getElementById('costoKWh').addEventListener('input', () => {
+                previsualizarCosto();
+                renderTable(); // Si cambia el costo por KWh, recalcular todo
+            });
+            document.getElementById('cargoFijo').addEventListener('input', renderTable); // Si cambia el cargo fijo, recalcular solo el total
+            
+            // Llama a la previsualización inicial y renderiza la tabla (vacía o con valores iniciales)
+            previsualizarCosto();
+            renderTable();
+        });
+
+        /**
+         * Calcula y muestra el consumo y costo del dispositivo que se está ingresando (previsualización).
+         */
+        function previsualizarCosto() {
+            const potenciaW = parseFloat(document.getElementById('inputPotencia').value);
+            const cantidad = parseFloat(document.getElementById('inputCantidad').value);
+            const horasDia = parseFloat(document.getElementById('inputHoras').value);
+            const diasMes = parseFloat(document.getElementById('inputDias').value);
+            const costoKWh = parseFloat(document.getElementById('costoKWh').value);
+
+            const tempKwh = document.getElementById('tempKwh');
+            const tempCosto = document.getElementById('tempCosto');
+
+            // Permite que horasDia sea 0, pero el resto debe ser positivo
+            if (isNaN(potenciaW) || isNaN(cantidad) || isNaN(horasDia) || isNaN(diasMes) || isNaN(costoKWh) ||
+                potenciaW <= 0 || cantidad <= 0 || horasDia < 0 || diasMes <= 0 || costoKWh <= 0) {
+                tempKwh.value = '0.00 kWh';
+                tempCosto.value = '$ 0';
+                return;
+            }
+
+            // Consumo Mensual (kWh) = (W * Cantidad * Horas/día * Días/mes) / 1000
+            const consumoMensualKWh = (potenciaW * cantidad * horasDia * diasMes) / 1000;
+            const costoMensualCLP = consumoMensualKWh * costoKWh;
+            
+            tempKwh.value = formatNumber(consumoMensualKWh) + ' kWh';
+            tempCosto.value = formatterCLP.format(costoMensualCLP);
+        }
+
+        /**
+         * Agrega el dispositivo actual a la lista y actualiza la tabla.
+         */
+        function agregarDispositivo() {
+            const nombre = document.getElementById('inputNombre').value.trim();
+            const potenciaW = parseFloat(document.getElementById('inputPotencia').value);
+            const cantidad = parseFloat(document.getElementById('inputCantidad').value);
+            const horasDia = parseFloat(document.getElementById('inputHoras').value);
+            const diasMes = parseFloat(document.getElementById('inputDias').value);
+            const costoKWh = parseFloat(document.getElementById('costoKWh').value);
+            
+            const errorMensaje = document.getElementById('errorMensaje');
+
+            if (!nombre || isNaN(potenciaW) || isNaN(cantidad) || isNaN(horasDia) || isNaN(diasMes) || 
+                potenciaW <= 0 || cantidad <= 0 || horasDia < 0 || diasMes <= 0 || isNaN(costoKWh) || costoKWh <= 0) {
+                errorMensaje.classList.remove('hidden');
+                return;
+            }
+            errorMensaje.classList.add('hidden');
+
+            // Calcular consumo y costo
+            // Consumo Mensual (kWh) = (W * Cantidad * Horas/día * Días/mes) / 1000
+            const consumoMensualKWh = (potenciaW * cantidad * horasDia * diasMes) / 1000;
+            const costoMensualCLP = consumoMensualKWh * costoKWh;
+
+            // Agregar a la lista de dispositivos
+            devices.push({
+                id: Date.now(), // ID único para poder borrarlo
+                nombre: nombre,
+                potencia: potenciaW,
+                cantidad: cantidad,
+                horas: horasDia,
+                dias: diasMes,
+                consumoMensualKWh: consumoMensualKWh,
+                costoMensualCLP: costoMensualCLP
+            });
+
+            // Actualizar la interfaz
+            renderTable();
+            
+            // Limpiar los inputs del artefacto para el siguiente ingreso
+            document.getElementById('inputNombre').value = '';
+            document.getElementById('inputPotencia').value = '0';
+            document.getElementById('inputCantidad').value = '1';
+            document.getElementById('inputHoras').value = '0';
+            document.getElementById('inputDias').value = '30';
+            previsualizarCosto(); // Resetear la previsualización
+        }
+
+        /**
+         * Elimina un dispositivo por su ID.
+         */
+        function eliminarDispositivo(id) {
+            // Filtra la lista, manteniendo solo los que NO coinciden con el ID
+            devices = devices.filter(device => device.id !== id);
+            renderTable();
+        }
+
+        /**
+         * Recalcula totales y actualiza la tabla de dispositivos.
+         */
+        function renderTable() {
+            const tableBody = document.getElementById('tablaDispositivos');
+            tableBody.innerHTML = '';
+            
+            let totalKwhAcumulado = 0;
+            let totalCostoAcumulado = 0;
+            
+            const costoKWh = parseFloat(document.getElementById('costoKWh').value);
+            
+            if (devices.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-400">
+                            Aún no ha agregado ningún dato a la tabla.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                devices.forEach(device => {
+                    // Recalcular el costo por si el usuario cambió el CLP/kWh
+                    const nuevoConsumo = (device.potencia * device.cantidad * device.horas * device.dias) / 1000;
+                    const nuevoCosto = nuevoConsumo * costoKWh;
+
+                    device.consumoMensualKWh = nuevoConsumo;
+                    device.costoMensualCLP = nuevoCosto;
+
+                    totalKwhAcumulado += nuevoConsumo;
+                    totalCostoAcumulado += nuevoCosto;
+
+                    const row = tableBody.insertRow();
+                    row.className = 'hover:bg-gray-700'; // Fila con hover gris oscuro
+                    
+                    // Columna Artefacto
+                    row.insertCell().innerHTML = `<span class="font-bold text-text-light">${device.nombre}</span> <span class="block text-xs text-gray-400">(${device.cantidad} uds | ${device.horas}h/día | ${device.dias}d/mes)</span>`;
+                    
+                    // Columna Potencia
+                    row.insertCell().className = 'px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-400';
+                    row.cells[1].textContent = device.potencia + ' W';
+                    
+                    // Columna Consumo Total (kWh)
+                    row.insertCell().className = 'px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-highlight-blue';
+                    row.cells[2].textContent = formatNumber(device.consumoMensualKWh) + ' kWh';
+                    
+                    // Columna Costo Mensual
+                    row.insertCell().className = 'px-6 py-4 whitespace-nowrap text-right text-sm font-extrabold text-cec-green';
+                    row.cells[3].textContent = formatterCLP.format(device.costoMensualCLP);
+                    
+                    // Columna Acción (Eliminar)
+                    const deleteCell = row.insertCell();
+                    deleteCell.className = 'px-6 py-4 whitespace-nowrap text-center text-sm font-medium';
+                    deleteCell.innerHTML = `<button onclick="eliminarDispositivo(${device.id})" class="text-red-500 hover:text-red-400 transition duration-150 p-1 rounded-full hover:bg-gray-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>`;
+                });
+            }
+
+            // Actualizar Totales Finales
+            const cargoFijo = parseFloat(document.getElementById('cargoFijo').value) || 0;
+            const costoTotalFinal = totalCostoAcumulado + cargoFijo;
+            
+            document.getElementById('totalKwh').textContent = formatNumber(totalKwhAcumulado) + ' kWh';
+            document.getElementById('totalCosto').textContent = formatterCLP.format(costoTotalFinal);
+            
+            // Actualizar la nota del cargo fijo
+            document.getElementById('cargoFijoNota').innerHTML = `* Incluye cargo fijo mensual de ${formatterCLP.format(cargoFijo)}`;
+        }
+        
+    </script>
+</body>
+</html>
